@@ -7,14 +7,21 @@ jobs:
   warmup:
     runs-on: ubuntu-latest
     steps:
-      - run: sleep 60
+      - run: |
+          curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/jgiannuzzi/ILGPU/actions/runners
+      - run: sleep 30
 
   sandbox:
-    runs-on: cuda-10.2
+    strategy:
+      matrix:
+        os: [ubuntu-latest, cuda-10.2]
+    runs-on: ${{ matrix.os }}
     needs: warmup
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Sandbox
         run: |
+          echo ${{ matrix.os }}
+          echo ${{ matrix.needed }}
           ls -la .
