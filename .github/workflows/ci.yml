@@ -4,8 +4,14 @@ on:
   push:
 
 jobs:
+  warmup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 60
+
   sandbox:
     runs-on: cuda-10.2
+    needs: warmup
     steps:
       - name: Checkout
         uses: actions/checkout@v2
