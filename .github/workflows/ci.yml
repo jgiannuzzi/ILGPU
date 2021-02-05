@@ -69,6 +69,7 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJson(needs.setup-os-matrix.outputs.os) }}
+        pipeline: [Debug, Release, O2]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -89,10 +90,10 @@ jobs:
         run: dotnet build --configuration=Release -p:TreatWarningsAsErrors=true Src
       - name: CPU Tests
         if: matrix.os != 'cuda'
-        run: dotnet test --logger GitHubActions --configuration=Release ./Src/ILGPU.Tests.CPU
+        run: dotnet test --logger GitHubActions --configuration=Release --filter '_${{ matrix.pipeline }}.' ./Src/ILGPU.Tests.CPU
       - name: CUDA Tests
         if: matrix.os == 'cuda'
-        run: dotnet test --logger GitHubActions --configuration=Release ./Src/ILGPU.Tests.Cuda
+        run: dotnet test --logger GitHubActions --configuration=Release --filter '_${{ matrix.pipeline }}.' ./Src/ILGPU.Tests.Cuda
       - name: Set up NuGet
         if: runner.os == 'Windows'
         uses: nuget/setup-nuget@v1
