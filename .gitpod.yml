@@ -1,0 +1,6 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: "cd Src; dotnet tool restore; dotnet restore; dotnet msbuild -t:TextTemplateTransform -p:TargetFramework=NA; cd -"
+    command: "dotnet test -c Release Src/ILGPU.Tests.CPU"
