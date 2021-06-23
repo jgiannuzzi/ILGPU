@@ -185,6 +185,7 @@ jobs:
               'Update')
             $symbolsPkgZip.GetEntry($pdbEntryPath).Delete();
             $symbolsPkgZip.Dispose()
+          }
 
       - name: Upload NuGet package artifacts
         uses: actions/upload-artifact@v2
