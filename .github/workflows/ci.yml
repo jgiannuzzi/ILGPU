@@ -104,7 +104,6 @@ jobs:
         run: dotnet test --logger GitHubActions --no-build --configuration=Release --filter 'FullyQualifiedName~ArrayViewValid|FullyQualifiedName~ArrayGetExtent1D' Src/${{ matrix.library }}.Tests.Cuda
 
   package:
-    needs: build-and-test
     runs-on: windows-latest
     outputs:
       version: ${{ steps.package.outputs.version }}
@@ -201,7 +200,7 @@ jobs:
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [check-style, package]
+    needs: [check-style, build-and-test, package]
     runs-on: windows-latest
     steps:
       - name: Download NuGet package artifact
