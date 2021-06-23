@@ -105,8 +105,6 @@ jobs:
 
   package:
     runs-on: windows-latest
-    outputs:
-      version: ${{ steps.package.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -165,7 +163,7 @@ jobs:
 
           ForEach ($library in "ILGPU", "ILGPU.Algorithms") {
             # Get path to the Main and Symbols NuGet packages
-            $releaseDir = '.\Bin\Release'
+            $releaseDir = './Bin/Release'
             $mainPkgPath = Join-Path $releaseDir "$library.${{ steps.package.outputs.version }}.nupkg"
             $symbolsPkgPath = Join-Path $releaseDir "$library.${{ steps.package.outputs.version }}.snupkg"
 
@@ -178,7 +176,7 @@ jobs:
               'Update')
             [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
               $mainPkgZip,
-              "$releaseDir\net47\$library.pdb",
+              "$releaseDir/net47/$library.pdb",
               $pdbEntryPath);
             $mainPkgZip.Dispose()
 
@@ -205,6 +203,6 @@ jobs:
           name: nuget-packages
       - name: Publish to NuGet
         run: |
-          ForEach ($library in "ILGPU", "ILGPU.Algorithms") {
-            dotnet nuget push $library.${{ needs.package.outputs.version }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          ForEach ($package in Get-ChildItem -Filter *.nupkg) {
+            dotnet nuget push $package --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
           }
