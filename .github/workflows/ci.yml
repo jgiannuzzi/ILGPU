@@ -98,10 +98,10 @@ jobs:
         run: dotnet build --configuration=Release -p:TreatWarningsAsErrors=true Src
       - name: CPU Tests
         if: matrix.os != 'cuda'
-        run: dotnet test --logger GitHubActions --no-build --configuration=Release Src/${{ matrix.library }}.Tests.CPU
+        run: dotnet test --logger GitHubActions --no-build --configuration=Release --filter 'FullyQualifiedName~ArrayViewValid|FullyQualifiedName~ArrayGetExtent1D' Src/${{ matrix.library }}.Tests.CPU
       - name: CUDA Tests
         if: matrix.os == 'cuda'
-        run: dotnet test --logger GitHubActions --no-build --configuration=Release Src/${{ matrix.library }}.Tests.Cuda
+        run: dotnet test --logger GitHubActions --no-build --configuration=Release --filter 'FullyQualifiedName~ArrayViewValid|FullyQualifiedName~ArrayGetExtent1D' Src/${{ matrix.library }}.Tests.Cuda
 
   package:
     runs-on: windows-latest
