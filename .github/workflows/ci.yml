@@ -166,12 +166,8 @@ jobs:
           ForEach ($library in "ILGPU", "ILGPU.Algorithms") {
             # Get path to the Main and Symbols NuGet packages
             $releaseDir = '.\Bin\Release'
-            $mainPkgPath =
-              Get-ChildItem -Path $releaseDir -Filter $library.${{ steps.package.outputs.version }}.nupkg `
-              | Select-Object -First 1 -ExpandProperty Fullname
-            $symbolsPkgPath =
-              Get-ChildItem -Path $releaseDir -Filter $library.${{ steps.package.outputs.version }}.snupkg `
-              | Select-Object -First 1 -ExpandProperty Fullname
+            $mainPkgPath = Join-Path $releaseDir "$library.${{ steps.package.outputs.version }}.nupkg"
+            $symbolsPkgPath = Join-Path $releaseDir "$library.${{ steps.package.outputs.version }}.snupkg"
 
             # Transfer net47 pdb from the Symbols to Main NuGet package
             Add-Type -AssemblyName System.IO.Compression.FileSystem
