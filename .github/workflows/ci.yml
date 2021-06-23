@@ -70,7 +70,8 @@ jobs:
         id: setup-os-matrix
         run: |
           os='["ubuntu-latest","windows-latest","macos-latest"'
-          [ "${{ github.event.repository.fork }}" == "false" ] && os="$os,\"cuda\""
+          # TODO change me back to false before submitting PR
+          [ "${{ github.event.repository.fork }}" == "true" ] && os="$os,\"cuda\""
           os="$os]"
           echo "::set-output name=os::$os"
     outputs:
