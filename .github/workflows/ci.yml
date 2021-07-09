@@ -93,26 +93,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # .NET 5.0.x
-      - name: Setup .NET SDK v5.0.x
+      # Latest .NET SDK - v5.0.x
+      - name: Setup the latest .NET SDK
+        if: matrix.framework != 'netcoreapp3.1'
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
-      - name: Pin .NET Core SDK
-        run: dotnet new globaljson --sdk-version 5.0.x
+      
+      # Latest .NET SDK - v3.1.x
+      - name: Setup the latest .NET SDK v3.1.x
+        if: matrix.framework == 'netcoreapp3.1'
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
 
-      - name: Release Build
-        run: dotnet build --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true Src
-
-      - name: CPU Tests
+      - name: Build and test - CPU
         if: matrix.os != 'cuda'
-        run: dotnet test --logger GitHubActions --no-build --configuration=Release Src/${{ matrix.library }}.Tests.CPU
+        run: |
+          dotnet build --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true Src/${{ matrix.library }}
+          dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.CPU
         env:
           ILGPU_CLEAN_TESTS: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) }}
 
-      - name: CUDA Tests
+      - name: Build and test - CUDA
         if: matrix.os == 'cuda'
-        run: dotnet test --logger GitHubActions --no-build --configuration=Release Src/${{ matrix.library }}.Tests.Cuda
+        run: |
+          dotnet build --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true Src/${{ matrix.library }}
+          dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.Cuda
         env:
           ILGPU_CLEAN_TESTS: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) }}
 
@@ -125,26 +132,18 @@ jobs:
     needs: setup-os-matrix
     strategy:
       matrix:
-        os: ${{ fromJson(needs.setup-os-matrix.outputs.os) }}
         library: [ILGPU, ILGPU.Algorithms]
-        framework: [netcoreapp3.1, net5.0]
-        include:
-          - os: windows-latest
-            library: [ILGPU, ILGPU.Algorithms]
-            framework: net47
+        framework: [net47, netcoreapp3.1, net5.0]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # .NET 5.0.x
-      - name: Setup .NET SDK v5.0.x
+      - name: Setup the latest .NET SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
-      - name: Pin .NET Core SDK
-        run: dotnet new globaljson --sdk-version 5.0.x
 
       - name: Check version
         id: version
