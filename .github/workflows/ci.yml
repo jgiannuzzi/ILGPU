@@ -76,8 +76,23 @@ jobs:
     outputs:
       os: ${{ steps.setup-os-matrix.outputs.os }}
 
-  build-and-test:
-    needs: setup-os-matrix
+  build:
+    needs: check-style
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup the latest .NET 5 SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Build
+        run: dotnet build --configuration=Release -p:TreatWarningsAsErrors=true Src
+
+  test:
+    needs: [setup-os-matrix, build]
     strategy:
       matrix:
         os: ${{ fromJson(needs.setup-os-matrix.outputs.os) }}
@@ -98,7 +113,6 @@ jobs:
         with:
           dotnet-version: 5.0.x
       
-      # Latest .NET SDK - v3.1.x
       - name: Setup the latest .NET Core 3.1 SDK
         if: matrix.framework == 'netcoreapp3.1'
         uses: actions/setup-dotnet@v1
@@ -123,6 +137,7 @@ jobs:
     # This prevents duplicate CI runs for our own pull requests, whilst preserving the ability to
     # run the CI for each branch push to a fork, and for each pull request originating from a fork.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
+    needs: [build, test]
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -210,7 +225,7 @@ jobs:
 
   publish-nuget-pre-release:
     if: github.ref == 'refs/heads/master' && github.event.repository.fork == 'false'
-    needs: [check-style, build-and-test, package]
+    needs: [check-style, build, test, package]
     runs-on: ubuntu-latest
     steps:
       - name: Download NuGet package artifact
@@ -222,7 +237,7 @@ jobs:
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v') && github.event.repository.fork == 'false'
-    needs: [check-style, build-and-test, package]
+    needs: [check-style, build, test, package]
     runs-on: ubuntu-latest
     steps:
       - name: Download NuGet package artifact
