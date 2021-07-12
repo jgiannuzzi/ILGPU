@@ -93,15 +93,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # Latest .NET SDK - v5.0.x
-      - name: Setup the latest .NET SDK
-        if: matrix.framework != 'netcoreapp3.1'
+      - name: Setup the latest .NET 5 SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
       
       # Latest .NET SDK - v3.1.x
-      - name: Setup the latest .NET SDK v3.1.x
+      - name: Setup the latest .NET Core 3.1 SDK
         if: matrix.framework == 'netcoreapp3.1'
         uses: actions/setup-dotnet@v1
         with:
@@ -109,17 +107,13 @@ jobs:
 
       - name: Build and test - CPU
         if: matrix.os != 'cuda'
-        run: |
-          dotnet build --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true Src/${{ matrix.library }}
-          dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.CPU
+        run: dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.CPU
         env:
           ILGPU_CLEAN_TESTS: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) }}
 
       - name: Build and test - CUDA
         if: matrix.os == 'cuda'
-        run: |
-          dotnet build --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true Src/${{ matrix.library }}
-          dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.Cuda
+        run: dotnet test --configuration=Release --framework=${{ matrix.framework }} -p:TreatWarningsAsErrors=true --logger GitHubActions Src/${{ matrix.library }}.Tests.Cuda
         env:
           ILGPU_CLEAN_TESTS: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) }}
 
@@ -129,18 +123,12 @@ jobs:
     # This prevents duplicate CI runs for our own pull requests, whilst preserving the ability to
     # run the CI for each branch push to a fork, and for each pull request originating from a fork.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    needs: setup-os-matrix
-    strategy:
-      matrix:
-        library: [ILGPU, ILGPU.Algorithms]
-        framework: [net47, netcoreapp3.1, net5.0]
-      fail-fast: false
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup the latest .NET SDK
+      - name: Setup the latest .NET 5 SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
