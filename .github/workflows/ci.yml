@@ -100,7 +100,10 @@ jobs:
         framework: [netcoreapp3.1, net5.0]
         include:
           - os: windows-latest
-            library: [ILGPU, ILGPU.Algorithms]
+            library: ILGPU
+            framework: net47
+          - os: windows-latest
+            library: ILGPU.Algorithms
             framework: net47
       fail-fast: false
     runs-on: ${{ matrix.os }}
