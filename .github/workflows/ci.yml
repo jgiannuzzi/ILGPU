@@ -3,6 +3,9 @@ name: CI
 on:
   push:
   pull_request:
+  schedule:
+    # Daily at 00:00. 
+    - cron:  '0 0 * * *'
 
 env:
   DOTNET_NOLOGO: true
@@ -98,7 +101,6 @@ jobs:
         library: [ILGPU, ILGPU.Algorithms]
         framework: [netcoreapp3.1, net5.0]
         include:
-          # BUG in strategy matrix, workaround separate in two jobs
           - os: windows-latest
             library: ILGPU
             framework: net47
